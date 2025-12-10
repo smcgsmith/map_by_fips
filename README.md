@@ -9,7 +9,6 @@ A lightweight, reusable R utility for fast and flexible **county-level mapping**
 - **Optional log-scale transformation**
 - **Optional discrete or continuous color scales**
 - **Automatic shapefile loading**
-- **Optional plotting of point features** (e.g., slaughter facilities)
 - **Dependency auto-installation via `utils/packages.R`**
 
 This repo is designed to be cloned into future projects so you never rewrite mapping code again.
@@ -21,4 +20,4 @@ This repo is designed to be cloned into future projects so you never rewrite map
 Clone the repository:
 
 ```sh
-git clone https://github.com/<your-username>/map_by_fips.git
+git clone https://github.com/smcgsmith/map_by_fips.git
