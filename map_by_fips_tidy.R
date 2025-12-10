@@ -179,3 +179,86 @@ map_by_fips_tidy <- function(
   
   return(p)
 }
+
+log_breaks <- function(x, n = 5, min_val = 1, digits = 0) {
+  rng <- range(x, na.rm = TRUE)
+  rng[1] <- max(min_val, rng[1])
+  signif(10^seq(log10(rng[1]), log10(rng[2]), length.out = n), digits)
+}
+
+make_breaks <- function(x,
+                        n = 5,
+                        log = FALSE,
+                        min_val = NULL,
+                        method = c("linear", "quantile"),
+                        digits = NULL) {
+  # x: numeric vector (may contain NA)
+  # n: number of break values to return
+  # log: if TRUE, produce log-spaced breaks (base 10)
+  # min_val: lower bound for log scale (must be > 0). If NULL, chooses smallest positive value in x / 10.
+  # method: for linear (non-log) breaks: "linear" = even spacing, "quantile" = empirical quantiles
+  # digits: if not NULL, round result using signif(..., digits) if integer, or round(..., digits)
+  
+  method <- match.arg(method)
+  x_num <- as.numeric(x)
+  x_num <- x_num[!is.na(x_num)]
+  if (length(x_num) == 0) return(rep(NA_real_, n))
+  
+  if (log) {
+    # determine lower/upper bounds in positive space
+    maxv <- max(x_num, na.rm = TRUE)
+    # find a safe small positive min if min_val not provided
+    if (is.null(min_val)) {
+      pos <- x_num[x_num > 0]
+      if (length(pos) == 0) {
+        # no positive values: choose a small default
+        min_val_use <- 1e-6
+      } else {
+        min_val_use <- min(pos, na.rm = TRUE) / 10
+      }
+    } else {
+      min_val_use <- min_val
+    }
+    if (!is.finite(min_val_use) || min_val_use <= 0) min_val_use <- 1e-6
+    if (!is.finite(maxv) || maxv <= 0) {
+      # all values non-positive: fallback to linear breaks on x_num (may be zero)
+      br <- seq(min(x_num), max(x_num), length.out = n)
+    } else {
+      low <- min_val_use
+      high <- maxv
+      if (low == high) {
+        br <- rep(low, n)
+      } else {
+        seq_log <- seq(log10(low), log10(high), length.out = n)
+        br <- 10^seq_log
+      }
+    }
+  } else {
+    # non-log breaks
+    minv <- min(x_num, na.rm = TRUE)
+    maxv <- max(x_num, na.rm = TRUE)
+    if (minv == maxv) {
+      br <- rep(minv, n)
+    } else {
+      if (method == "quantile") {
+        probs <- seq(0, 1, length.out = n)
+        br <- as.numeric(stats::quantile(x_num, probs = probs, na.rm = TRUE, type = 7))
+      } else {
+        br <- seq(minv, maxv, length.out = n)
+      }
+    }
+  }
+  
+  # round/format if requested
+  if (!is.null(digits)) {
+    if (digits >= 1 && digits == as.integer(digits)) {
+      br <- signif(br, digits)
+    } else {
+      br <- round(br, digits)
+    }
+  }
+  
+  # ensure numeric and sorted
+  br <- sort(as.numeric(br))
+  return(br)
+}
