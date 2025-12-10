@@ -6,12 +6,8 @@ A lightweight, reusable R utility for fast and flexible **county-level mapping**
 
 - **Univariate choropleth maps**
 - **Bivariate maps** using *biscale*
-- **Optional log-scale transformation**
-- **Optional discrete or continuous color scales**
-- **Automatic shapefile loading**
-- **Dependency auto-installation via `utils/packages.R`**
-
-This repo is designed to be cloned into future projects so you never rewrite mapping code again.
+- **Log-scale transformation**
+- **Discrete or continuous color scales**
 
 ---
 
@@ -21,3 +17,27 @@ Clone the repository:
 
 ```sh
 git clone https://github.com/smcgsmith/map_by_fips.git
+
+---
+
+# Example usage
+
+``# Input must contain: FIPS, value
+data <- tibble(
+  FIPS = c("01001", "01003", "01005"),
+  value = c(0.001, 0.02, 0.15)
+)
+
+# Create a univariate map with a log-scaled legend
+p <- map_by_fips_tidy(
+  data.to.map = data,
+  log_scale = TRUE,
+  discrete_scale = TRUE,
+  color.break.type = "values",
+  color.break.values = log_breaks(data$value, n = 6, min_val = 0, digits = 6),
+  color.break.digits = 6,
+  color.sequence = c("white", "darkred"),
+  county.border.col = NA
+)
+
+p ``
