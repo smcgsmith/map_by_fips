@@ -17,12 +17,12 @@ Clone the repository:
 
 ```sh
 git clone https://github.com/smcgsmith/map_by_fips.git
-
+```
 ---
 
 # Example usage
-
-``# Input must contain: FIPS, value
+```
+# Input must contain: FIPS, value
 data <- tibble(
   FIPS = c("01001", "01003", "01005"),
   value = c(0.001, 0.02, 0.15)
@@ -40,4 +40,5 @@ p <- map_by_fips_tidy(
   county.border.col = NA
 )
 
-p ``
+p 
+```
