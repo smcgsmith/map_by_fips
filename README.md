@@ -5,7 +5,7 @@ R code for fast and flexible **county-level mapping** in the United States. Adap
 This version of ``map_by_fips_tidy()`` now supports:
 
 - **Univariate choropleth maps**
-- **Bivariate maps** using *biscale*
+- **Bivariate maps** using ``biscale``
 - **Log-scale transformation**
 - **Discrete or continuous color scales**
 - **Returns a ``ggplot2`` object for easy figure manipulation**

@@ -27,7 +27,8 @@ map_by_fips_tidy <- function(
     log_scale = FALSE,
     discrete_scale = FALSE
 ) {
-  
+  # Ensure packages are loaded and installed
+  source("./utils/packages.R")
   library(ggplot2)
   library(sf)
   library(dplyr)
