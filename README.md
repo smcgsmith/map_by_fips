@@ -19,6 +19,35 @@ Clone the repository:
 ```sh
 git clone https://github.com/smcgsmith/map_by_fips.git
 ```
+
+### Using from another project (R Markdown / scripts)
+
+To source this repo from a different project without copying files, set a base
+URL or local path so the function can find `utils/packages.R` and the `data/`
+files. You can do this with `options()` or environment variables:
+
+```r
+options(
+  map_by_fips_base_url = "https://raw.githubusercontent.com/<org>/<repo>/<branch>"
+)
+source(paste0(getOption("map_by_fips_base_url"), "/map_by_fips_tidy.R"))
+```
+
+Or for a local clone:
+
+```r
+options(
+  map_by_fips_base_path = "~/code/map_by_fips"
+)
+source(file.path(getOption("map_by_fips_base_path"), "map_by_fips_tidy.R"))
+```
+
+Environment variable equivalents:
+
+```r
+Sys.setenv(MAP_BY_FIPS_BASE_URL = "https://raw.githubusercontent.com/<org>/<repo>/<branch>")
+Sys.setenv(MAP_BY_FIPS_BASE_PATH = "~/code/map_by_fips")
+```
 ---
 
 ## Mapping one variable

@@ -1,3 +1,56 @@
+map_by_fips_resolve_base <- function() {
+  option_base <- getOption("map_by_fips_base_path", default = "")
+  option_url <- getOption("map_by_fips_base_url", default = "")
+  env_base <- Sys.getenv("MAP_BY_FIPS_BASE_PATH", "")
+  env_url <- Sys.getenv("MAP_BY_FIPS_BASE_URL", "")
+  
+  if (nzchar(option_base)) return(list(type = "path", base = option_base))
+  if (nzchar(env_base)) return(list(type = "path", base = env_base))
+  if (nzchar(option_url)) return(list(type = "url", base = option_url))
+  if (nzchar(env_url)) return(list(type = "url", base = env_url))
+  
+  srcfile <- attr(environment(map_by_fips_tidy), "srcfile")
+  if (!is.null(srcfile)) {
+    src_dir <- tryCatch(getSrcDirectory(srcfile, unique = TRUE), error = function(e) NA)
+    if (!is.na(src_dir) && nzchar(src_dir)) {
+      return(list(type = "path", base = src_dir))
+    }
+  }
+  
+  list(type = "path", base = ".")
+}
+
+map_by_fips_source <- function(relative_path, base_info) {
+  if (identical(base_info$type, "url")) {
+    source(paste0(base_info$base, "/", relative_path))
+  } else {
+    local_path <- file.path(base_info$base, relative_path)
+    if (!file.exists(local_path)) {
+      stop("map_by_fips: could not find ", local_path, call. = FALSE)
+    }
+    source(local_path)
+  }
+}
+
+map_by_fips_load <- function(relative_path, base_info) {
+  if (identical(base_info$type, "url")) {
+    temp_file <- tempfile(fileext = paste0("_", basename(relative_path)))
+    utils::download.file(
+      url = paste0(base_info$base, "/", relative_path),
+      destfile = temp_file,
+      mode = "wb",
+      quiet = TRUE
+    )
+    load(temp_file, envir = parent.frame())
+  } else {
+    local_path <- file.path(base_info$base, relative_path)
+    if (!file.exists(local_path)) {
+      stop("map_by_fips: could not find ", local_path, call. = FALSE)
+    }
+    load(local_path, envir = parent.frame())
+  }
+}
+
 map_by_fips_tidy <- function(
     data.to.map,
     state.border.col = "black",
@@ -28,7 +81,8 @@ map_by_fips_tidy <- function(
     discrete_scale = FALSE
 ) {
   # Ensure packages are loaded and installed
-  source("./utils/packages.R")
+  base_info <- map_by_fips_resolve_base()
+  map_by_fips_source("utils/packages.R", base_info)
   library(ggplot2)
   library(sf)
   library(dplyr)
@@ -36,8 +90,8 @@ map_by_fips_tidy <- function(
   # ------------------------------------------------------------------------
   # Load shapefiles
   # ------------------------------------------------------------------------
-  load("./data/MAP_county_census2016_5m.RData")
-  load("./data/MAP_state_census2016_5m.RData")
+  map_by_fips_load("data/MAP_county_census2016_5m.RData", base_info)
+  map_by_fips_load("data/MAP_state_census2016_5m.RData", base_info)
   
   county_sf <- st_as_sf(county_boundary_2016_5m)
   state_sf  <- st_as_sf(state_boundary_2016_5m)
