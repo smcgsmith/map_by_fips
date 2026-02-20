@@ -78,7 +78,8 @@ map_by_fips_tidy <- function(
     ylab = "Y Axis",
     proj.info = "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=km +no_defs",
     log_scale = FALSE,
-    discrete_scale = FALSE
+    discrete_scale = FALSE,
+    facility.scale = c("size", "color")
 ) {
   # Ensure packages are loaded and installed
   base_info <- map_by_fips_resolve_base()
@@ -86,6 +87,8 @@ map_by_fips_tidy <- function(
   library(ggplot2)
   library(sf)
   library(dplyr)
+  
+  facility.scale <- match.arg(facility.scale)
   
   # ------------------------------------------------------------------------
   # Load shapefiles
@@ -134,9 +137,17 @@ map_by_fips_tidy <- function(
     facs <- data.to.map %>% filter(!is.na(slat), !is.na(slon), !is.na(metric))
     if (nrow(facs) > 0) {
       facs_sf <- st_as_sf(facs, coords = c("slon","slat"), crs = 4326) |> st_transform(crs = proj.info)
-      p <- p + geom_sf(data = facs_sf, aes(size = metric), fill = "yellow3", color="black",
-                       alpha=.7, shape=21) +
-        scale_size_continuous(range=c(2,12), name=legend.title)
+      if (facility.scale == "color") {
+        p <- p + geom_sf(data = facs_sf, aes(color = metric), size = 3, alpha = 0.8) +
+          scale_color_gradientn(
+            colors = colorRampPalette(color.sequence)(256),
+            name = legend.title
+          )
+      } else {
+        p <- p + geom_sf(data = facs_sf, aes(size = metric), fill = "yellow3", color = "black",
+                         alpha = .7, shape = 21) +
+          scale_size_continuous(range = c(2, 12), name = legend.title)
+      }
     }
     
     return(p)

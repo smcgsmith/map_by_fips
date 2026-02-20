@@ -8,6 +8,7 @@ This version of ``map_by_fips_tidy()`` now supports:
 - **Bivariate maps** using ``biscale``
 - **Log-scale transformation**
 - **Discrete or continuous color scales**
+- **Facility point metric mapped by size or color** (``facility.scale``)
 - **Returns a ``ggplot2`` object for easy figure manipulation**
 
 ---
